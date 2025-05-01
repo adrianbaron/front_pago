@@ -1,6 +1,6 @@
 // credit_card_form.dart
 import 'package:flutter/material.dart';
-import 'package:front_pago/interfaces_abstractas/payment_form.dart';
+import 'package:front_pago/factories/interfaces_abstractas/payment_form.dart';
 
 
 class CreditCardForm implements PaymentForm {

@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../interfaces_abstractas/payment_button.dart';
+import '../../factories/interfaces_abstractas/payment_button.dart';
 
 
 class PayPalButton implements PaymentButton {

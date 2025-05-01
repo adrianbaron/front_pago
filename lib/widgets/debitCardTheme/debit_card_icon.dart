@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:front_pago/interfaces_abstractas/payment_icon.dart';
+import 'package:front_pago/factories/interfaces_abstractas/payment_icon.dart';
 
 class DebitCardIcon implements PaymentIcon {
   @override

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../interfaces_abstractas/payment_form.dart';
+import '../../factories/interfaces_abstractas/payment_form.dart';
 
 
 class DebitCardForm implements PaymentForm {
