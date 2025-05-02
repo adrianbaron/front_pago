@@ -1,81 +1,79 @@
-import 'package:flutter/material.dart';
-import 'package:front_pago/builder/payment/payment_report_builder.dart';
+// payment_report_director.dart
 import 'package:front_pago/builder/payment/payment_report_config.dart';
-import 'package:front_pago/builder/payment/payment_report_generator.dart';
-import 'package:printing/printing.dart';
 
 class PaymentReportDirector {
-  // Método para crear un reporte estándar básico
-  static PaymentReportConfig createStandardReport() {
-    return PaymentReportBuilder()
-        .withLogo(true)
-        .withTitle("Comprobante de Pago")
-        .withPaymentDetails(true)
-        .withUserInfo(true)
-        .withTheme(ReportTheme.LIGHT)
-        .withTimestamp(true)
-        .withFooterMessage("Gracias por su pago")
-        .withFormat(ReportFormat.A4)
-        .build();
-  }
-  
-  // Método para crear un reporte resumido
-  static PaymentReportConfig createSummaryReport() {
-    return PaymentReportBuilder()
-        .withLogo(true)
-        .withTitle("Resumen de Pago")
-        .withPaymentDetails(false)
-        .withUserInfo(false)
-        .withTheme(ReportTheme.LIGHT)
-        .withTimestamp(true)
-        .withFooterMessage("Comprobante simplificado")
-        .withFormat(ReportFormat.A4)
-        .build();
-  }
-  
-  // Método para crear un reporte detallado con tema oscuro
-  static PaymentReportConfig createDetailedDarkReport() {
-    return PaymentReportBuilder()
-        .withLogo(true)
-        .withTitle("Detalle Completo de Transacción")
-        .withPaymentDetails(true)
-        .withUserInfo(true)
-        .withTheme(ReportTheme.DARK)
-        .withTimestamp(true)
-        .withFooterMessage("Documento oficial de pago")
-        .withFormat(ReportFormat.LETTER)
-        .build();
-  }
-}
+  // Prototipos de reportes comunes
+  static final PaymentReportConfig _standardPrototype = PaymentReportConfig(
+    includeLogo: true,
+    title: "Comprobante de Pago",
+    includePaymentDetails: true,
+    includeUserInfo: true,
+    theme: ReportTheme.LIGHT,
+    includeTimestamp: true,
+    footerMessage: "Gracias por su pago",
+    format: ReportFormat.A4,
+  );
 
-// Ejemplo de uso en payment_screen.dart
-Future<void> generateAndShowReport(Map<String, dynamic> paymentData, BuildContext context) async {
-  // Crear configuración de reporte
-  final reportConfig = PaymentReportBuilder()
-      .withLogo(true)
-      .withTitle("Comprobante de Pago")
-      .withPaymentDetails(true)
-      .withUserInfo(true)
-      .withTheme(ReportTheme.LIGHT)
-      .withTimestamp(true)
-      .withFooterMessage("Gracias por su pagoooo")
-      .withFormat(ReportFormat.A4)
+  static final PaymentReportConfig _summaryPrototype = PaymentReportConfig(
+    includeLogo: true,
+    title: "Resumen de Pago",
+    includePaymentDetails: false,
+    includeUserInfo: false,
+    theme: ReportTheme.LIGHT,
+    includeTimestamp: true,
+    footerMessage: "Comprobante simplificado",
+    format: ReportFormat.A4,
+  );
+
+  static final PaymentReportConfig _detailedDarkPrototype = PaymentReportConfig(
+    includeLogo: true,
+    title: "Detalle Completo de Transacción",
+    includePaymentDetails: true,
+    includeUserInfo: true,
+    theme: ReportTheme.DARK,
+    includeTimestamp: true,
+    footerMessage: "Documento oficial de pago",
+    format: ReportFormat.LETTER,
+  );
+
+  // Método para obtener un reporte estándar (usando clone)
+  static PaymentReportConfig createStandardReport() {
+    return _standardPrototype.clone();
+  }
+  
+  // Método para obtener un reporte resumido (usando clone)
+  static PaymentReportConfig createSummaryReport() {
+    return _summaryPrototype.clone();
+  }
+  
+  // Método para obtener un reporte detallado oscuro (usando clone)
+  static PaymentReportConfig createDetailedDarkReport() {
+    return _detailedDarkPrototype.clone();
+  }
+  
+  // Método para crear un reporte estándar con modificaciones
+  static PaymentReportConfig createCustomStandardReport({
+    String? title,
+    String? footerMessage,
+    ReportTheme? theme,
+  }) {
+    return _standardPrototype.toBuilder()
+      .withTitle(title ?? _standardPrototype.title)
+      .withFooterMessage(footerMessage ?? _standardPrototype.footerMessage)
+      .withTheme(theme ?? _standardPrototype.theme)
       .build();
+  }
   
-  // O usar configuraciones predefinidas
-  // final reportConfig = PaymentReportDirector.createStandardReport();
-  
-  // Generar PDF
-  final generator = PaymentReportGenerator(
-    config: reportConfig,
-    paymentData: paymentData,
-  );
-  
-  final pdfBytes = await generator.generatePdfReport();
-  
-  // Mostrar PDF o compartirlo
-  await Printing.sharePdf(
-    bytes: pdfBytes, 
-    filename: 'comprobante_pago_${DateTime.now().millisecondsSinceEpoch}.pdf'
-  );
+  // Método para crear un reporte resumido con modificaciones
+  static PaymentReportConfig createCustomSummaryReport({
+    String? title,
+    String? footerMessage,
+    bool? includeUserInfo,
+  }) {
+    return _summaryPrototype.toBuilder()
+      .withTitle(title ?? _summaryPrototype.title)
+      .withFooterMessage(footerMessage ?? _summaryPrototype.footerMessage)
+      .withUserInfo(includeUserInfo ?? _summaryPrototype.includeUserInfo)
+      .build();
+  }
 }

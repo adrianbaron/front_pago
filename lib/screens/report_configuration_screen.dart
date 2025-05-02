@@ -48,7 +48,6 @@ class _ReportConfigurationScreenState extends State<ReportConfigurationScreen> {
     final primaryColor = paymentProvider.currentPrimaryColor;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: primaryColor,
         title: const Text('Configurar Reporte'),
         elevation: 4,
       ),

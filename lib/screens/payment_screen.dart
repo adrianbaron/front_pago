@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:front_pago/models/notification_request.dart';
 import 'package:front_pago/models/payment_request.dart';
 import 'package:front_pago/provider/payment_provider.dart';
 import 'package:front_pago/widgets/common/loading_button.dart';
@@ -20,11 +21,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
   final TextEditingController _recipientController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+// Variable para almacenar los datos de notificación
+  NotificationRequest? _notificationData;
   @override
   void dispose() {
     _amountController.dispose();
     _recipientController.dispose();
     super.dispose();
+  }
+
+   // Método para capturar los datos de notificación
+  void _updateNotificationData(NotificationRequest notificationRequest) {
+    setState(() {
+      _notificationData = notificationRequest;
+    });
   }
 
   // Método para procesar el pago
@@ -42,10 +52,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
       
       // Crear la solicitud de pago
       final request = PaymentRequest(
-        paymentType: paymentProvider.selectedPaymentType,
+         paymentType: paymentProvider.selectedPaymentType,
         amount: amount,
-        notificationType: paymentProvider.selectedNotificationType,
-        notificationRecipient: _recipientController.text,
+        notificationType: _notificationData!.type,
+        notificationRecipient: _notificationData!.recipient,
+        notificationDetails: _notificationData
+        // Puedes añadir más campos aquí si son necesarios para la API de pagos
+
       );
       
       // Procesar el pago
@@ -55,11 +68,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
         // Mostrar diálogo con el resultado
         showDialog(
           context: context,
-          builder: (context) => PaymentResultDialog(
-            response: response,
-            paymentType: paymentProvider.selectedPaymentType,
-            notificationType: paymentProvider.selectedNotificationType,
-            recipient: _recipientController.text,
+                builder: (context) => PaymentResultDialog(
+                  response: response,
+                  paymentType: paymentProvider.selectedPaymentType,
+                  notificationType: _notificationData!.type,
+                  recipient: _notificationData!.recipient,
+                  
           ),
         );
       }
@@ -129,7 +143,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     PaymentAmountField(controller: _amountController),
                     
                     // Selector de notificación
-                    NotificationSelector(recipientController: _recipientController),
+                   NotificationSelector(
+                      recipientController: _recipientController,
+                      onNotificationDataReady: _updateNotificationData,
+                    ),
                     
                     // Botón de procesar pago
                     LoadingButton(

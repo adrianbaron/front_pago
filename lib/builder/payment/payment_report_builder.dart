@@ -1,3 +1,4 @@
+// payment_report_builder.dart
 import 'package:front_pago/builder/payment/payment_report_config.dart';
 
 class PaymentReportBuilder {
@@ -9,6 +10,21 @@ class PaymentReportBuilder {
   bool _includeTimestamp = true;
   String _footerMessage = "Gracias por su pago";
   ReportFormat _format = ReportFormat.A4;
+
+  // Constructor por defecto vacío
+  PaymentReportBuilder();
+
+  // Constructor que acepta un prototipo
+  PaymentReportBuilder.fromPrototype(PaymentReportConfig prototype) {
+    _includeLogo = prototype.includeLogo;
+    _title = prototype.title;
+    _includePaymentDetails = prototype.includePaymentDetails;
+    _includeUserInfo = prototype.includeUserInfo;
+    _theme = prototype.theme;
+    _includeTimestamp = prototype.includeTimestamp;
+    _footerMessage = prototype.footerMessage;
+    _format = prototype.format;
+  }
 
   PaymentReportBuilder withLogo(bool include) {
     _includeLogo = include;

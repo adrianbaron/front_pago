@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:front_pago/models/notification_request.dart';
 import 'package:front_pago/provider/payment_provider.dart';
 import 'package:front_pago/utils/validators.dart';
 import 'package:front_pago/widgets/common/custom_card.dart';
@@ -7,10 +8,12 @@ import 'package:provider/provider.dart';
 
 class NotificationSelector extends StatefulWidget {
   final TextEditingController recipientController;
+  final Function(NotificationRequest) onNotificationDataReady;
   
   const NotificationSelector({
     Key? key,
     required this.recipientController,
+    required this.onNotificationDataReady,
   }) : super(key: key);
 
   @override
@@ -103,6 +106,8 @@ class _NotificationSelectorState extends State<NotificationSelector> {
                 paymentProvider.setNotificationType(newValue);
                 // Limpiar el campo cuando se cambia el tipo
                 widget.recipientController.clear();
+                // Actualizar los datos de notificación
+                _updateNotificationData();
               }
             },
           ),
@@ -129,6 +134,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
               value, 
               paymentProvider.selectedNotificationType
             ),
+            onChanged: (_) => _updateNotificationData(),
           ),
           const SizedBox(height: 16),
           // Campo para el asunto (común pero principalmente para email)
@@ -143,6 +149,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
               prefixIcon: Icon(Icons.subject, color: primaryColor),
             ),
             validator: (value) => value == null || value.isEmpty ? 'El asunto es requerido' : null,
+            onChanged: (_) => _updateNotificationData(),
           ),
           const SizedBox(height: 16),
           // Campo para el mensaje (común para todos los tipos)
@@ -158,6 +165,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
             ),
             maxLines: 3,
             validator: (value) => value == null || value.isEmpty ? 'El mensaje es requerido' : null,
+            onChanged: (_) => _updateNotificationData(),
           ),
           
           // Campos específicos según el tipo de notificación
@@ -167,8 +175,8 @@ class _NotificationSelectorState extends State<NotificationSelector> {
             _buildSmsFields(primaryColor),
           if (paymentProvider.selectedNotificationType == 'push')
             _buildPushFields(primaryColor),
-          if (paymentProvider.selectedNotificationType == 'whatsapp')
-            _buildWhatsAppFields(primaryColor),
+          if (paymentProvider.selectedNotificationType == 'ws')
+            _buildWhatsappFields(primaryColor),
         ],
       ),
     );
@@ -185,6 +193,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
             border: const OutlineInputBorder(),
             prefixIcon: Icon(Icons.people, color: primaryColor),
           ),
+          onChanged: (_) => _updateNotificationData(),
         ),
         const SizedBox(height: 16),
         TextFormField(
@@ -194,6 +203,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
             border: const OutlineInputBorder(),
             prefixIcon: Icon(Icons.people_outline, color: primaryColor),
           ),
+          onChanged: (_) => _updateNotificationData(),
         ),
         const SizedBox(height: 16),
         TextFormField(
@@ -203,6 +213,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
             border: const OutlineInputBorder(),
             prefixIcon: Icon(Icons.attach_file, color: primaryColor),
           ),
+          onChanged: (_) => _updateNotificationData(),
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
@@ -221,6 +232,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
             if (newValue != null) {
               setState(() {
                 _emailPriority = newValue;
+                _updateNotificationData();
               });
             }
           },
@@ -240,6 +252,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
             border: const OutlineInputBorder(),
             prefixIcon: Icon(Icons.person, color: primaryColor),
           ),
+          onChanged: (_) => _updateNotificationData(),
         ),
         const SizedBox(height: 16),
         CheckboxListTile(
@@ -252,6 +265,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
             if (value != null) {
               setState(() {
                 _deliveryReportRequired = value;
+                _updateNotificationData();
               });
             }
           },
@@ -267,6 +281,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
             if (dateTime != null) {
               setState(() {
                 _scheduleTime = dateTime;
+                _updateNotificationData();
               });
             }
           },
@@ -286,6 +301,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
             border: const OutlineInputBorder(),
             prefixIcon: Icon(Icons.image, color: primaryColor),
           ),
+          onChanged: (_) => _updateNotificationData(),
         ),
         const SizedBox(height: 16),
         TextFormField(
@@ -295,6 +311,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
             border: const OutlineInputBorder(),
             prefixIcon: Icon(Icons.touch_app, color: primaryColor),
           ),
+          onChanged: (_) => _updateNotificationData(),
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
@@ -313,6 +330,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
             if (newValue != null) {
               setState(() {
                 _pushPriority = newValue;
+                _updateNotificationData();
               });
             }
           },
@@ -321,7 +339,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
     );
   }
 
-  Widget _buildWhatsAppFields(Color primaryColor) {
+  Widget _buildWhatsappFields(Color primaryColor) {
     return Column(
       children: [
         const SizedBox(height: 16),
@@ -332,6 +350,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
             border: const OutlineInputBorder(),
             prefixIcon: Icon(Icons.attachment, color: primaryColor),
           ),
+          onChanged: (_) => _updateNotificationData(),
         ),
         const SizedBox(height: 16),
         TextFormField(
@@ -341,6 +360,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
             border: const OutlineInputBorder(),
             prefixIcon: Icon(Icons.closed_caption, color: primaryColor),
           ),
+          onChanged: (_) => _updateNotificationData(),
         ),
         const SizedBox(height: 16),
         TextFormField(
@@ -350,6 +370,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
             border: const OutlineInputBorder(),
             prefixIcon: Icon(Icons.smart_button, color: primaryColor),
           ),
+          onChanged: (_) => _updateNotificationData(),
         ),
         const SizedBox(height: 16),
         TextFormField(
@@ -362,6 +383,7 @@ class _NotificationSelectorState extends State<NotificationSelector> {
           onChanged: (value) {
             setState(() {
               _language = value;
+              _updateNotificationData();
             });
           },
         ),
@@ -399,74 +421,84 @@ class _NotificationSelectorState extends State<NotificationSelector> {
     );
   }
   
-  // Método para obtener los datos de notificación para la API
-  Map<String, dynamic> getNotificationData() {
+  // Método para generar la solicitud de notificación
+  NotificationRequest _createNotificationRequest() {
     final paymentProvider = Provider.of<PaymentProvider>(context, listen: false);
     final type = paymentProvider.selectedNotificationType;
     
-    // Datos básicos comunes para todos los tipos
-    final Map<String, dynamic> data = {
-      'type': type,
-      'recipient': widget.recipientController.text,
-      'subject': _subjectController.text,
-      'message': _messageController.text,
-    };
-    
-    // Agregar campos específicos según el tipo
     switch (type) {
       case 'email':
-        if (_ccController.text.isNotEmpty) {
-          data['cc'] = _ccController.text.split(',').map((e) => e.trim()).toList();
-        }
-        if (_bccController.text.isNotEmpty) {
-          data['bcc'] = _bccController.text.split(',').map((e) => e.trim()).toList();
-        }
-        if (_attachmentsController.text.isNotEmpty) {
-          data['attachments'] = _attachmentsController.text.split(',').map((e) => e.trim()).toList();
-        }
-        if (_emailPriority != null) {
-          data['emailPriority'] = _emailPriority;
-        }
-        break;
+        return NotificationRequest(
+          type: type,
+          recipient: widget.recipientController.text,
+          subject: _subjectController.text,
+          message: _messageController.text,
+          cc: _ccController.text.isNotEmpty 
+            ? _ccController.text.split(',').map((e) => e.trim()).toList() 
+            : null,
+          bcc: _bccController.text.isNotEmpty 
+            ? _bccController.text.split(',').map((e) => e.trim()).toList() 
+            : null,
+          attachments: _attachmentsController.text.isNotEmpty 
+            ? _attachmentsController.text.split(',').map((e) => e.trim()).toList() 
+            : null,
+          emailPriority: _emailPriority,
+        );
         
       case 'sms':
-        if (_senderIdController.text.isNotEmpty) {
-          data['senderId'] = _senderIdController.text;
-        }
-        data['deliveryReportRequired'] = _deliveryReportRequired;
-        if (_scheduleTime != null) {
-          data['scheduleTime'] = _scheduleTime!.toIso8601String();
-        }
-        break;
+        return NotificationRequest(
+          type: type,
+          recipient: widget.recipientController.text,
+          subject: _subjectController.text,
+          message: _messageController.text,
+          senderId: _senderIdController.text.isNotEmpty ? _senderIdController.text : null,
+          deliveryReportRequired: _deliveryReportRequired,
+          scheduleTime: _scheduleTime?.toIso8601String(),
+        );
         
       case 'push':
-        if (_imageUrlController.text.isNotEmpty) {
-          data['imageUrl'] = _imageUrlController.text;
-        }
-        if (_clickActionController.text.isNotEmpty) {
-          data['clickAction'] = _clickActionController.text;
-        }
-        if (_pushPriority != null) {
-          data['pushPriority'] = _pushPriority;
-        }
-        break;
+        return NotificationRequest(
+          type: type,
+          recipient: widget.recipientController.text,
+          subject: _subjectController.text,
+          message: _messageController.text,
+          imageUrl: _imageUrlController.text.isNotEmpty ? _imageUrlController.text : null,
+          clickAction: _clickActionController.text.isNotEmpty ? _clickActionController.text : null,
+          pushPriority: _pushPriority,
+        );
         
-      case 'whatsapp':
-        if (_mediaUrlController.text.isNotEmpty) {
-          data['mediaUrl'] = _mediaUrlController.text;
-        }
-        if (_captionController.text.isNotEmpty) {
-          data['caption'] = _captionController.text;
-        }
-        if (_interactiveButtonsController.text.isNotEmpty) {
-          data['interactiveButtons'] = _interactiveButtonsController.text.split(',').map((e) => e.trim()).toList();
-        }
-        if (_language != null) {
-          data['language'] = _language;
-        }
-        break;
+      case 'ws':
+        return NotificationRequest(
+          type: type,
+          recipient: widget.recipientController.text,
+          subject: _subjectController.text,
+          message: _messageController.text,
+          mediaUrl: _mediaUrlController.text.isNotEmpty ? _mediaUrlController.text : null,
+          caption: _captionController.text.isNotEmpty ? _captionController.text : null,
+          interactiveButtons: _interactiveButtonsController.text.isNotEmpty 
+            ? _interactiveButtonsController.text.split(',').map((e) => e.trim()).toList() 
+            : null,
+          language: _language,
+        );
+        
+      default:
+        return NotificationRequest(
+          type: type,
+          recipient: widget.recipientController.text,
+          subject: _subjectController.text,
+          message: _messageController.text,
+        );
     }
-    
-    return data;
+  }
+  
+  // Método para actualizar los datos de notificación
+  void _updateNotificationData() {
+    // Verificar que los campos obligatorios estén llenos antes de llamar al callback
+    if (widget.recipientController.text.isNotEmpty && 
+        _subjectController.text.isNotEmpty && 
+        _messageController.text.isNotEmpty) {
+      final request = _createNotificationRequest();
+      widget.onNotificationDataReady(request);
+    }
   }
 }
